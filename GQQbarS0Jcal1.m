@@ -69,19 +69,24 @@ if mix == false
     r = zeros(3,3,numel(x));
 
     for i=1:numel(x) 
-        %Get the hybrid matrix
-        v11 = vHybrid(x(i), j, m, 'v11');
-        v22 = vHybrid(x(i), j, m, 'v22');
-        v33 = vHybrid(x(i), j, m, 'v33');
-        v23 = vHybrid(x(i), j, m, 'v23');
+        % Get diagonal and off-diagonal components
+        %v11 = vDiagonalH0(x(i), j, m, 'v11');
+        v22 = vDiagonalH0(x(i), j, m, 'v22');
+        %v33 = vDiagonalH0(x(i), j, m, 'v33');
+        %v44 = vDiagonalH0(x(i), j, m, 'v44');
+        v55 = vDiagonalH0(x(i), j, m, 'v55');
+        v66 = vDiagonalH0(x(i), j, m, 'v66');
+    
+        %[v12, v35, v36, v45, v46] = vOffDiagonalH0(x(i), j, m);
+        v56 = vCouplingH0(x(i), j, m);
 
-        r(1,1,i) = v11; 
+        r(1,1,i) = v22; 
 
-        r(2,2,i) = v22;
-        r(2,3,i) = v23;
-        r(3,2,i) = v23;
+        r(2,2,i) = v55;
+        r(2,3,i) = v56;
+        r(3,2,i) = v56;
 
-        r(3,3,i) = v33;
+        r(3,3,i) = v66;
 
     end
 
@@ -359,20 +364,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Hybrid potentials %%%%%%%%%%%%
-
-function val = vHybrid(x, j, m, type)
-    switch type
-        %The order of the states is the one in my notes and goes in
-        %acordance with the matrix below vDiagonalH0
-        % (P^0, P^+, P^-) so this means that the 2nd row is the one
-        % corresponding to L=J+1 and the third the one corresponding to
-        % J=L-1
-        case 'v11', val = (j*(j+1))./(x.^2) + m.*VPiU(x,m);
-        case 'v22', val = ((j+1)*(j+2))./(x.^2) + m.*VSigU(x,m) + m.*Vq(x,m).*(j)/(2*j+1);
-        case 'v33', val = ((j-1)*j)./(x.^2) + m.*VSigU(x,m) + m.*Vq(x,m).*(j+1)/(2*j + 1);
-        case 'v23', val = m.*Vq(x,m).*sqrt(j*(j+1)/(2*j+1));
-    end
-end
+% Apear already in the mixing matrices
 
 % Mixing potentials H0 %%%%%%%%%%%%
 % The ones from the program of matrices of Ruben but with this m factor
@@ -393,7 +385,7 @@ end
 
 function [v12, v35, v36, v45, v46] = vOffDiagonalH0(x, j, m)
     % Calculations for off-diagonal mixing terms
-    v12 = 2*m.*VSigMix(x,m); 
+    v12 = 2*m.*VPiMix(x,m); 
     
     v35 = 2*m.*(VPiMix(x,m) + ((j+1)/(2*j+1)).*VMixq(x,m));
     v36 = -2*m.*VMixq(x,m).*sqrt(j*(j+1))/(2*j+1);
