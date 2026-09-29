@@ -1,0 +1,311 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global/global}
+    \entry{BAYE20151}{article}{}{}
+      \name{author}{1}{}{%
+        {{hash=25a1a539b6ff1b8337f62efb0622642f}{%
+           family={Baye},
+           familyi={B\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{25a1a539b6ff1b8337f62efb0622642f}
+      \strng{fullhash}{25a1a539b6ff1b8337f62efb0622642f}
+      \strng{fullhashraw}{25a1a539b6ff1b8337f62efb0622642f}
+      \strng{bibnamehash}{25a1a539b6ff1b8337f62efb0622642f}
+      \strng{authorbibnamehash}{25a1a539b6ff1b8337f62efb0622642f}
+      \strng{authornamehash}{25a1a539b6ff1b8337f62efb0622642f}
+      \strng{authorfullhash}{25a1a539b6ff1b8337f62efb0622642f}
+      \strng{authorfullhashraw}{25a1a539b6ff1b8337f62efb0622642f}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{The Lagrange-mesh method is an approximate variational method taking the form of equations on a grid thanks to the use of a Gauss-quadrature approximation. The variational basis related to this Gauss quadrature is composed of Lagrange functions which are infinitely differentiable functions vanishing at all mesh points but one. This method is quite simple to use and, more importantly, can be very accurate with small number of mesh points for a number of problems. The accuracy may however be destroyed by singularities of the potential term. This difficulty can often be overcome by a regularization of the Lagrange functions which does not affect the simplicity and accuracy of the method. The principles of the Lagrange-mesh method are described, as well as various generalizations of the Lagrange functions and their regularization. The main existing meshes are reviewed and extensive formulas are provided which make the numerical calculations simple. They are in general based on classical orthogonal polynomials. The extensions to non-classical orthogonal polynomials and periodic functions are also presented. Applications start with the calculations of energies, wave functions and some observables for bound states in simple solvable models which can rather easily be used as exercises by the reader. The Dirac equation is also considered. Various problems in the continuum can also simply and accurately be solved with the Lagrange-mesh technique including multichannel scattering or scattering by non-local potentials. The method can be applied to three-body systems in appropriate systems of coordinates. Simple atomic, molecular and nuclear systems are taken as examples. The applications to the time-dependent Schrödinger equation, to the Gross–Pitaevskii equation and to Hartree–Fock calculations are also discussed as well as translations and rotations on a Lagrange mesh.}
+      \field{issn}{0370-1573}
+      \field{journaltitle}{Physics Reports}
+      \field{note}{The Lagrange-mesh method}
+      \field{title}{The Lagrange-mesh method}
+      \field{volume}{565}
+      \field{year}{2015}
+      \field{pages}{1\bibrangedash 107}
+      \range{pages}{107}
+      \verb{doi}
+      \verb https://doi.org/10.1016/j.physrep.2014.11.006
+      \endverb
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/pii/S0370157314004086
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/pii/S0370157314004086
+      \endverb
+      \keyw{Lagrange-mesh method,Gauss quadrature,Orthogonal polynomials,Schrödinger and Dirac equations,Two-body bound states and continuum,Three-body bound states}
+    \endentry
+    \entry{Luscher:2002qv}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=1d976c1272281b1020b3bca95b327167}{%
+           family={Luscher},
+           familyi={L\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+        {{hash=a076b6589e3315838ae09ccf3efef7a9}{%
+           family={Weisz},
+           familyi={W\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{dfa6cfb793660da9f3260180ba61863f}
+      \strng{fullhash}{dfa6cfb793660da9f3260180ba61863f}
+      \strng{fullhashraw}{dfa6cfb793660da9f3260180ba61863f}
+      \strng{bibnamehash}{dfa6cfb793660da9f3260180ba61863f}
+      \strng{authorbibnamehash}{dfa6cfb793660da9f3260180ba61863f}
+      \strng{authornamehash}{dfa6cfb793660da9f3260180ba61863f}
+      \strng{authorfullhash}{dfa6cfb793660da9f3260180ba61863f}
+      \strng{authorfullhashraw}{dfa6cfb793660da9f3260180ba61863f}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{JHEP}
+      \field{title}{{Quark confinement and the bosonic string}}
+      \field{volume}{07}
+      \field{year}{2002}
+      \field{pages}{049}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1088/1126-6708/2002/07/049
+      \endverb
+      \verb{eprint}
+      \verb hep-lat/0207003
+      \endverb
+    \endentry
+    \entry{Oncala:2017hop}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=9f1b3141b6a3ce109ef808578f3da4db}{%
+           family={Oncala},
+           familyi={O\bibinitperiod},
+           given={Rubén},
+           giveni={R\bibinitperiod}}}%
+        {{hash=ef28e0dbe4a0e2865f130835d6866639}{%
+           family={Soto},
+           familyi={S\bibinitperiod},
+           given={Joan},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{d8cbb61215e4bd7575bca3560aca6591}
+      \strng{fullhash}{d8cbb61215e4bd7575bca3560aca6591}
+      \strng{fullhashraw}{d8cbb61215e4bd7575bca3560aca6591}
+      \strng{bibnamehash}{d8cbb61215e4bd7575bca3560aca6591}
+      \strng{authorbibnamehash}{d8cbb61215e4bd7575bca3560aca6591}
+      \strng{authornamehash}{d8cbb61215e4bd7575bca3560aca6591}
+      \strng{authorfullhash}{d8cbb61215e4bd7575bca3560aca6591}
+      \strng{authorfullhashraw}{d8cbb61215e4bd7575bca3560aca6591}
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{hep-ph}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{Phys. Rev. D}
+      \field{number}{1}
+      \field{title}{{Heavy Quarkonium Hybrids: Spectrum, Decay and Mixing}}
+      \field{volume}{96}
+      \field{year}{2017}
+      \field{pages}{014004}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1103/PhysRevD.96.014004
+      \endverb
+      \verb{eprint}
+      \verb 1702.03900
+      \endverb
+    \endentry
+    \entry{Pineda:2013lta}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=04d5ea196aefb7d0682ed6260699b8f5}{%
+           family={Pineda},
+           familyi={P\bibinitperiod},
+           given={Antonio},
+           giveni={A\bibinitperiod}}}%
+        {{hash=61c4dcbd23584975ffb83345b2709eab}{%
+           family={Segovia},
+           familyi={S\bibinitperiod},
+           given={J.},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{6ec21239bea21d9b514b39623abf87d9}
+      \strng{fullhash}{6ec21239bea21d9b514b39623abf87d9}
+      \strng{fullhashraw}{6ec21239bea21d9b514b39623abf87d9}
+      \strng{bibnamehash}{6ec21239bea21d9b514b39623abf87d9}
+      \strng{authorbibnamehash}{6ec21239bea21d9b514b39623abf87d9}
+      \strng{authornamehash}{6ec21239bea21d9b514b39623abf87d9}
+      \strng{authorfullhash}{6ec21239bea21d9b514b39623abf87d9}
+      \strng{authorfullhashraw}{6ec21239bea21d9b514b39623abf87d9}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{hep-ph}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{Phys. Rev. D}
+      \field{number}{7}
+      \field{title}{{Improved determination of heavy quarkonium magnetic dipole transitions in potential nonrelativistic QCD}}
+      \field{volume}{87}
+      \field{year}{2013}
+      \field{pages}{074024}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1103/PhysRevD.87.074024
+      \endverb
+      \verb{eprint}
+      \verb 1302.3528
+      \endverb
+    \endentry
+    \entry{Schlosser:2025tca}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=99a79006bf4e86262e8a97fc07f5e9e2}{%
+           family={Schlosser},
+           familyi={S\bibinitperiod},
+           given={Carolin},
+           giveni={C\bibinitperiod}}}%
+        {{hash=b2a7c1f1a50ee72caff2751fcf90184b}{%
+           family={Wagner},
+           familyi={W\bibinitperiod},
+           given={Marc},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \strng{fullhash}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \strng{fullhashraw}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \strng{bibnamehash}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \strng{authorbibnamehash}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \strng{authornamehash}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \strng{authorfullhash}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \strng{authorfullhashraw}{66bd9c29d7644cca1430b1dca91e9cf9}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{hep-lat}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{Phys. Rev. D}
+      \field{number}{7}
+      \field{title}{{Hybrid spin-dependent and hybrid-quarkonium mixing potentials at order (1/mQ)1 from SU(3) lattice gauge theory}}
+      \field{volume}{111}
+      \field{year}{2025}
+      \field{pages}{074504}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1103/PhysRevD.111.074504
+      \endverb
+      \verb{eprint}
+      \verb 2501.08844
+      \endverb
+    \endentry
+    \entry{Soto:2020xpm}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=ef28e0dbe4a0e2865f130835d6866639}{%
+           family={Soto},
+           familyi={S\bibinitperiod},
+           given={Joan},
+           giveni={J\bibinitperiod}}}%
+        {{hash=8e32a769c48bf9a7c7ed68b5616d8d89}{%
+           family={Tarrús\bibnamedelima Castellà},
+           familyi={T\bibinitperiod\bibinitdelim C\bibinitperiod},
+           given={Jaume},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \strng{fullhash}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \strng{fullhashraw}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \strng{bibnamehash}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \strng{authorbibnamehash}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \strng{authornamehash}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \strng{authorfullhash}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \strng{authorfullhashraw}{c31d9cb5a2356fc2abc01489e9cef67d}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{hep-ph}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{Phys. Rev. D}
+      \field{note}{[Erratum: Phys.Rev.D 110, 099901 (2024)]}
+      \field{number}{1}
+      \field{title}{{Nonrelativistic effective field theory for heavy exotic hadrons}}
+      \field{volume}{102}
+      \field{year}{2020}
+      \field{pages}{014012}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1103/PhysRevD.102.014012
+      \endverb
+      \verb{eprint}
+      \verb 2005.00552
+      \endverb
+    \endentry
+    \entry{Soto:2023lbh}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=ef28e0dbe4a0e2865f130835d6866639}{%
+           family={Soto},
+           familyi={S\bibinitperiod},
+           given={Joan},
+           giveni={J\bibinitperiod}}}%
+        {{hash=61224136758c2c9b6ce8bfd34fd38e00}{%
+           family={Valls},
+           familyi={V\bibinitperiod},
+           given={Sandra\bibnamedelima Tomàs},
+           giveni={S\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \strng{namehash}{5cc23b8033e478be78da9bf0fbe03913}
+      \strng{fullhash}{5cc23b8033e478be78da9bf0fbe03913}
+      \strng{fullhashraw}{5cc23b8033e478be78da9bf0fbe03913}
+      \strng{bibnamehash}{5cc23b8033e478be78da9bf0fbe03913}
+      \strng{authorbibnamehash}{5cc23b8033e478be78da9bf0fbe03913}
+      \strng{authornamehash}{5cc23b8033e478be78da9bf0fbe03913}
+      \strng{authorfullhash}{5cc23b8033e478be78da9bf0fbe03913}
+      \strng{authorfullhashraw}{5cc23b8033e478be78da9bf0fbe03913}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{hep-ph}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{Phys. Rev. D}
+      \field{number}{1}
+      \field{title}{{Hyperfine splittings of heavy quarkonium hybrids}}
+      \field{volume}{108}
+      \field{year}{2023}
+      \field{pages}{014025}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1103/PhysRevD.108.014025
+      \endverb
+      \verb{eprint}
+      \verb 2302.01765
+      \endverb
+    \endentry
+  \enddatalist
+  \missing{Soto:2017}
+\endrefsection
+\endinput
+
