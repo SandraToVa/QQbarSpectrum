@@ -491,7 +491,7 @@ end
 function y = Vhf(r, m, A)
     [~, ~, ~, ~, ~, r0]=parameters4;
 
-    num = A + (r/r0)^2 * ( - (1/6) * Vsa(r0, m) - (1/(3*r0)) * Vsb(r0, m) );
+    num = A + (r/r0)^2 * ( - (1/6) * Vsa(r0, m) - (r/(3*r0)) * Vsb(r0, m) );
     den = 1 + (r/r0)^5;
 
     y = num / den;
