@@ -12,23 +12,23 @@ m_q = 1.496;
 % ---------------------------------------------------------
 
 % Quarkonium spin 0 spectrum (orederd by J=L)
-[s,ws,~] = QQbarS0J0(m_q);
-[p,wp,~] = QQbarS0J1(m_q);
-[d,wd,~] = QQbarS0J2(m_q);
+[s,ws,x0] = QQbarS0J0(m_q);
+[p,wp,x1] = QQbarS0J1(m_q);
+[d,wd,x2] = QQbarS0J2(m_q);
 
 % Quarkonium spin 1 spectrum (ordered by J \neq L)
 % Without mixing this gives the same as spin 0 states because we don't have
 % hyperfine splitting of quarkonium at this order.
 % We can see which state is it by the shape of the wave function
-[j0,wj0,~] = QQbarS1J0(m_q);
-[j1,wj1,~] = QQbarS1J1(m_q);
-[j2,wj2,~] = QQbarS1J2(m_q);
+[j0,wj0,jx0] = QQbarS1J0(m_q);
+[j1,wj1,jx1] = QQbarS1J1(m_q);
+[j2,wj2,jx2] = QQbarS1J2(m_q);
 
 % Hybrids spin 0 spectrum (ordered by Jcal=J \neq L)
 % We can see which state is it by the shape of the wave function
-[h0,wh0,~] = GQQbarS0Jcal0(m_q);
-[h1,wh1,~] = GQQbarS0Jcal1(m_q);
-[h2,wh2,~] = GQQbarS0Jcal2(m_q);
+[h0,wh0,hx0] = GQQbarS0Jcal0(m_q);
+[h1,wh1,hx1] = GQQbarS0Jcal1(m_q);
+[h2,wh2,hx2] = GQQbarS0Jcal2(m_q);
 
 % Hybrids spin 1 spectrum (ordered by Jcal \neq J \neq L)
 % Without mixing this gives the different as spin 0 states because we have
@@ -37,21 +37,45 @@ m_q = 1.496;
 A=-0.070;
 B=0.0117;
 
-[jh0,wfjh0,x0] = GQQbarS1Jcal0(m_q,A,B);
-[jh1,wfjh1,x1] = GQQbarS1Jcal1(m_q,A,B);
-[jh2,wfjh2,x2] = GQQbarS1Jcal2(m_q,A,B);
-[jh3,wfjh3,x3] = GQQbarS1Jcal3(m_q,A,B);
+[jh0,wjh0,jhx0] = GQQbarS1Jcal0(m_q,A,B);
+[jh1,wjh1,jhx1] = GQQbarS1Jcal1(m_q,A,B);
+[jh2,wjh2,jhx2] = GQQbarS1Jcal2(m_q,A,B);
+[jh3,wjh3,jhx3] = GQQbarS1Jcal3(m_q,A,B);
 
 % ---------------------------------------------------------
 % Plots
 % ---------------------------------------------------------
 
-wf_all = {wfjh0, wfjh1, wfjh2, wfjh3};
-x_all  = {x0, x1, x2, x3};
-e_all  = {jh0, jh1, jh2, jh3};
-j_list = [0, 1, 2, 3];
+spin=true;
+G=true;
 
-for n = 1:4
+if spin
+    if G
+        wf_all = {wjh0, wjh1, wjh2, wjh3};
+        x_all  = {jhx0, jhx1, jhx2, jhx3};
+        e_all  = {jh0, jh1, jh2, jh3};
+        j_list = [0, 1, 2, 3];
+    else
+        wf_all = {wj0, wj1, wj2};
+        x_all  = {jx0, jx1, jx2};
+        e_all  = {j0, j1, j2};
+        j_list = [0, 1, 2];
+    end
+else
+    if G
+        wf_all = {wh0, wh1, wh2};
+        x_all  = {hx0, hx1, hx2};
+        e_all  = {h0, h1, h2};
+        j_list = [0, 1, 2];
+    else
+        wf_all = {ws, wp, wd};
+        x_all  = {x0, x1, x2};
+        e_all  = {s, p, d};
+        j_list = [0, 1, 2];
+    end
+end
+
+for n = 1:length(j_list)
     % Open a separate figure window for each J_cal
     figure('Color', 'w', 'Name', sprintf('J_cal = %d', j_list(n)));
     x_curr = x_all{n};
@@ -106,6 +130,7 @@ dof = N - p;
 
 % 4. Compute reduced chi-squared
 chi2_red = chi2 / dof;
+
 
 % ---------------------------------------------------------
 % Functions
