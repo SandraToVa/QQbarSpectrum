@@ -369,7 +369,7 @@ end
 
 function [v12, v35, v36, v45, v46] = vOffDiagonalH0(x, j, m)
     % Calculations for off-diagonal mixing terms
-    v12 = 2*m.*VSigMix(x,m); 
+    v12 = 2*m.*VPiMix(x,m); 
     
     v35 = 2*m.*(VPiMix(x,m) + ((j+1)/(2*j+1)).*VMixq(x,m));
     v36 = -2*m.*VMixq(x,m).*sqrt(j*(j+1))/(2*j+1);
