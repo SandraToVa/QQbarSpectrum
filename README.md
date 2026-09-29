@@ -39,7 +39,9 @@ A single family can also be called directly:
 | `hybridConfig.m` | Flags for the hybrid files: `Eg`, `Eval`, `mix`, `hf`, `glamb1`, `glamb3`, `sig`, `pm`, `r0` |
 | `hybridAssignments.m` | Lattice data `t`, `e` and which computed state each data point is compared with (one table for mix=false, one for mix=true) |
 | `QQbarSpectrum.m` | Computes everything and plots the wave functions |
+| `QQbarSpectrumTable.m` | Spectrum tables as in mixing.pdf: n, S, J, j, L, E, J^PC, dominant component, %Q, %H of every state |
 | `QQbarSpectrum_Optimize.m` | Fit of A and B |
+| `spinAverages.m` | Spin averages and splittings of each multiplet vs the data at given (A, B), with a χ² breakdown |
 | `proposeMixAssignment.m` | Suggests the mix=true assignment table from the mix=false one (wave-function overlaps), as a cross-check |
 | `solveRadialSchrodinger.m` | Solver: energies and wave functions of a coupled-channel radial problem |
 | `radialMesh.m`, `radialHamiltonian.m` | Mesh and Hamiltonian matrix used by the solver |
@@ -154,8 +156,14 @@ table should be checked against the wave functions.
   matrix is identically zero.
 - `cF` and the `Eg` shift are only switched on when `m == 1.496` exactly.
 
-## Status (mix = false, hf = true, Eg = true)
+## Status (Eg = true, hf = true)
 
-A = −0.0548 ± 0.0085, B = 0.0038 ± 0.0045, chi^2/dof = 40.9/12 = 3.41.
-About 12.9 of the chi^2 comes from the spin-0 points, which do not depend on
-A or B. The assignments of data points 4, 9 and 11 are being revised.
+- mix = false: A = −0.0447 ± 0.0140, B = 0.0014 ± 0.0078 (errors scaled by
+  √(χ²/dof)), ρ = 0.57, χ²/dof = 33.0/12 = 2.75. The four spin-0 points, which
+  do not depend on A or B, contribute 7.5 to the χ².
+- mix = true: A = −0.0920 ± 0.0150, B = −0.0397 ± 0.0071, ρ = 0.01,
+  χ²/dof = 43.8/12 = 3.65. The mix = true assignment table should be checked at
+  this minimum.
+
+The fitted energies get the error σ_E = √(σ_fit² + 0.03²) GeV, where σ_fit is
+the (A, B) covariance propagated to each energy (checked on the 1σ ellipse).
