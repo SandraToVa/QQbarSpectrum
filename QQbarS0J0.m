@@ -3,51 +3,30 @@
 % Autor: Sandra Tomàs
 % Creador subrutines i font: Ruben Oncala
 
-function [E,W,x]=QQbarS0J0(m)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Mesh and potential matrix                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  % the endpoints of the integration interval:
-system.a=0.001;   
-system.b=22; 
-% parameters of the boundary conditions:
+function [E,W,x,info]=QQbarS0J0(m,opts)
+% OUTPUT: E    : energies of the lowest states (GeV)
+%         W    : W(c,:,k) radial wave function u_c(r) of channel c of state k
+%         x    : radial points where W is evaluated (GeV^-1)
+%         info : mesh, eigenvectors, channel weights (info.weights) and the
+%                potential handle info.V (see solveRadialSchrodinger)
+% opts (optional): solver options (see solveRadialSchrodinger), or the
+%         string 'potential' to only return info.V without solving
+% The number of channels is set automatically by the potential matrix
+% (it changes with the mix flag).
 
-%---------Coose n!----------
-% without mixing just quarkonium spectrum n=1
-% with mixing of hybrids spin 1 and quarkonium spin 0: n=3
-n=3;
-system.A1= eye(n);
-system.A2= zeros(n,n);
-system.B1= eye(n);
-system.B2= zeros(n,n);
-% function handle to the function returning the potential matrix (capture mass m)
-system.V=@(x) potentialMatrix(x,m);
+% function handle to the potential matrix (capture mass m)
+Vfun=@(x) potentialMatrix(x,m);
 
+% number of states we compute
+nstates=7;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Number of states we compute               %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-kmax=6; 
-%EigvData.eigenvalues returens 3 times the same state. We only need it 1
-
-%number of actual states
-E=zeros(1,kmax+1);
-tol0=5e-6; 
-[EigvData,meshData]=computeEigenvalues_vS(system,0,kmax,tol0);
-E(:) = EigvData.eigenvalues(:) / m;
-
-for i=1:length(E)
-    % --- FIX: Skip eigenfunctions for failed energies ---
-    if isnan(E(i))
-        warning('Eigenvalue %d failed to converge. Skipping eigenfunction.', i);
-        continue;
-    end
-    % ----------------------------------------------------
-    [x,Y,~]=computeEigenfunction(system,meshData,E(i)*m,1);
-    W(:,:,i)=Y;
+if ~exist('opts','var'), opts = struct(); end
+if ischar(opts) && strcmp(opts,'potential')
+    E=[]; W=[]; x=[]; info.V=Vfun;
+    return;
 end
-
+[E,W,x,info]=solveRadialSchrodinger(Vfun,m,nstates,opts);
+info.V=Vfun;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,13 +43,17 @@ end
 % The potentias as they are they compute E(GeV) to obtain the spectrum we
 % need to add 2mQ - Eg
 function [Eg,Eval]=parameters2
-Eg=true;
-Eval = 0.45;
+% set in quarkoniumConfig.m
+cfg=quarkoniumConfig;
+Eg=cfg.Eg;
+Eval=cfg.Eval;
 end
 
 % Mixing parameter
 function [mix]=parameters3
-mix=true;
+% set in quarkoniumConfig.m
+cfg=quarkoniumConfig;
+mix=cfg.mix;
 end
 
 
@@ -87,16 +70,16 @@ function r=potentialMatrix(x,m)
 
 if mix == false
 
-    r = zeros(1,1,4);
+    r = zeros(1,1,numel(x));
 
-    for i=1:4 
+    for i=1:numel(x) 
         r(1,1,i)=v(x(i),j,m); 
     end
 
 elseif mix == true
-    r = zeros(3,3,4);
+    r = zeros(3,3,numel(x));
 
-    for i=1:4
+    for i=1:numel(x)
         % Get diagonal and off-diagonal components
         v11 = vDiagonalH1(x(i), j, m, 'v11');
         v22 = vDiagonalH1(x(i), j, m, 'v22');
@@ -366,7 +349,7 @@ end
 % Mixing potentials H1 %%%%%%%%%%%%
 % The ones from the program of matrices of Ruben but with this m factor
 % extra. Important point
-% Mixing matrix of quarkonium spin 0 with hybrid spin 1
+% Mixing matrix of quarkonium spin 0 with hybrid spin 1 (17) on notes
 function val = vDiagonalH1(x, j, m, type)
     switch type
         case 'v11', val = (j*(j+1))./(x.^2) + m.*VSigG(x,m);
@@ -388,7 +371,7 @@ end
 
 function val = vCouplingH1(x, j, m, type)
     if strcmp(type, 'v23'), val = m.*Vq(x,m)*sqrt((j+1)*(j+2))/(2*j+3);
-    else,                  val = m.*Vq(x,m)*sqrt((j-1)*j)/(2*j-1); 
+    else,                   val = m.*Vq(x,m)*sqrt((j-1)*j)/(2*j-1); 
     end
 end
 

@@ -10,59 +10,30 @@
 % Autor: Sandra Tomàs
 % Creador subrutines i font: Ruben Oncala
 
-function [E,W,x]=GQQbarS1Jcal2(m,A,B)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Mesh and potential matrix                 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% the endpoints of the integration interval:
-system.a=0.001;   
-system.b=22; 
-% parameters of the boundary conditions:
+function [E,W,x,info]=GQQbarS1Jcal2(m,A,B,opts)
+% OUTPUT: E    : energies of the lowest states (GeV)
+%         W    : W(c,:,k) radial wave function u_c(r) of channel c of state k
+%         x    : radial points where W is evaluated (GeV^-1)
+%         info : mesh, eigenvectors, channel weights (info.weights) and the
+%                potential handle info.V (see solveRadialSchrodinger)
+% opts (optional): solver options (see solveRadialSchrodinger), or the
+%         string 'potential' to only return info.V without solving
+% The number of channels is set automatically by the potential matrix
+% (it changes with the mix flag).
 
-%---------Coose n!----------
-% without mixing:
-%   - with hyperfine: the spectrum of the paper JS & STV \diff from spin 0
-%   (n=9)
-%   - without hyperfine: this case is exactly the same as spin 0 hyrbids
-%   with mixing and no hyperfine (we don't do it here)
-% with mixing: 
-%   - with hyperfine: spectrum from Ruben very non-degenerated (n=10)
-%   - without hyperfine: the mixing breaks degerenacy with spin 0 hybrids
-%   (n=10)
+% function handle to the potential matrix (capture mass m)
+Vfun=@(x) potentialMatrix(x,m,A,B);
 
-n=9;
-system.A1= eye(n);
-system.A2= zeros(n,n);
-system.B1= eye(n);
-system.B2= zeros(n,n);
-% function handle to the function returning the potential matrix (capture mass m)
-system.V=@(x) potentialMatrix(x,m,A,B);
+% number of states we compute
+nstates=7;
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Number of states we compute               %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-kmax=6; 
-%EigvData.eigenvalues returens 3 times the same state. We only need it 1
-
-%number of actual states
-E=zeros(1,kmax+1);
-tol0=2e-7; 
-[EigvData,meshData]=computeEigenvalues_vS(system,0,kmax,tol0);
-E(:) = EigvData.eigenvalues(:) / m;
-
-for i=1:length(E)
-    % --- FIX: Skip eigenfunctions for failed energies ---
-    if isnan(E(i))
-        warning('Eigenvalue %d failed to converge. Skipping eigenfunction.', i);
-        continue;
-    end
-    % ----------------------------------------------------
-    [x,Y,~]=computeEigenfunction(system,meshData,E(i)*m,1);
-    W(:,:,i)=Y;
+if ~exist('opts','var'), opts = struct(); end
+if ischar(opts) && strcmp(opts,'potential')
+    E=[]; W=[]; x=[]; info.V=Vfun;
+    return;
 end
-
+[E,W,x,info]=solveRadialSchrodinger(Vfun,m,nstates,opts);
+info.V=Vfun;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -78,25 +49,25 @@ end
 % The potentias as they are they compute E(GeV) to obtain the spectrum we
 % need to add 2mQ - Eg
 function [Eg,Eval]=parameters2
-Eg=true;
-Eval = 0.45;
+% set in hybridConfig.m
+cfg=hybridConfig;
+Eg=cfg.Eg;
+Eval=cfg.Eval;
 end
 
 % Mixing parameter
 function [mix]=parameters3
-mix=false;
+% set in hybridConfig.m
+cfg=hybridConfig;
+mix=cfg.mix;
 end
 
 % Hyperfine splitting
 function [hf, glamb1, glamb3, sig, pm, r0]=parameters4
-hf=true; %this actibates or not the hyperfine splitting - will always be true
-         % if this is not true the sprectum is the same as the sone for
-         % spin 0
-glamb1 = -0.1; %value of glamnbda' in GeV
-glamb3 = 0.2; %value of glamnbda''' in GeV
-sig = 0.21; %value of string tension in GeV^2
-pm = -1; %value of the +- sign of Vsb
-r0 = 3.96; %value in units of GeV^-1
+% set in hybridConfig.m
+cfg=hybridConfig;
+hf=cfg.hf; glamb1=cfg.glamb1; glamb3=cfg.glamb3;
+sig=cfg.sig; pm=cfg.pm; r0=cfg.r0;
 end
 
 
@@ -113,10 +84,10 @@ function r=potentialMatrix(x,m,A,B)
 [hf, ~, ~, ~, ~, ~]=parameters4;
 
 if mix == false
-    r = zeros(9,9,4);
+    r = zeros(9,9,numel(x));
 
     if hf == true
-        for i=1:4
+        for i=1:numel(x)
         % Get diagonal and off-diagonal components of static potential
             %%% Part coupled to quarkonium
             %v11 = vDiagonalH1(x(i), j, m, 'v11');
@@ -223,10 +194,10 @@ if mix == false
     end
 
 elseif mix == true
-    r = zeros(10,10,4);
+    r = zeros(10,10,numel(x));
 
         if hf == true
-        for i=1:4
+        for i=1:numel(x)
         % Get diagonal and off-diagonal components of static potential
             %%% Part coupled to quarkonium
             v11 = vDiagonalH1(x(i), j, m, 'v11');
@@ -345,7 +316,7 @@ elseif mix == true
         end
         
         elseif hf == false
-        for i=1:4
+        for i=1:numel(x)
         % Get diagonal and off-diagonal components of static potential
             %%% Part coupled to quarkonium
             v11 = vDiagonalH1(x(i), j, m, 'v11');
