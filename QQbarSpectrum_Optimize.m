@@ -20,6 +20,9 @@
 %  - Errors from the Jacobian at the minimum: cov = inv(J'*J) (Delta chi^2=1),
 %    also given scaled by sqrt(chi^2/dof) when chi^2/dof > 1 (PDG convention).
 %    The chi^2 map is plotted with the 68% / 95% contours for 2 parameters.
+%  - Errors of the fitted energies: the (A,B) covariance (with correlation)
+%    is propagated to each E, checked on the 1-sigma ellipse, and added in
+%    quadrature to sigma_th = 0.03 GeV (higher orders).
 
 % =========================================================
 % Settings
@@ -123,10 +126,35 @@ scale = max(1, sqrt(chi2_red));
 at_bound = abs(best_params - lb) < 1e-6*(ub-lb) | abs(best_params - ub) < 1e-6*(ub-lb);
 
 % Mesh convergence check at the minimum
-E_central = model_spectrum(model, A_central, B_central);
+[E_central, dEdA, dEdB] = model_spectrum(model, A_central, B_central);
 opts2 = solverOpts; opts2.N = round(1.4*solverOpts.N); opts2.rmax = 1.2*solverOpts.rmax;
 model2 = identify_states(build_model(m_q, assign, opts2), A_central, B_central);
 dE_mesh = max(abs(model_spectrum(model2, A_central, B_central) - E_central));
+
+% =========================================================
+% 5. Errors of the fitted energies
+% =========================================================
+% Covariance of (A,B) propagated to each energy, keeping the correlation:
+%   sigma_fit^2 = G*C*G',  G = [dE/dA, dE/dB] (Hellmann-Feynman).
+% Cross-check beyond linear order: largest |E - E_central| on the 1-sigma
+% ellipse of (A,B) (for a linear E both give exactly the same number).
+% The error used is the ellipse one; spin-0 states do not depend on A, B.
+% Total error: sigma_fit added in quadrature to sigma_th (higher orders).
+C_E = scale^2 * cov_matrix;          % scaled by chi^2/dof when > 1 (PDG)
+sigma_th = 0.03;                     % GeV
+sigma_lin = sqrt(sum(([dEdA(:), dEdB(:)] * C_E) .* [dEdA(:), dEdB(:)], 2))';
+n_ell = 72;
+Lc = chol(C_E, 'lower');
+sigma_fit = zeros(1, N);
+for q = 1:n_ell
+    dp = Lc * [cos(2*pi*q/n_ell); sin(2*pi*q/n_ell)];
+    Eq = model_spectrum(model, A_central + dp(1), B_central + dp(2));
+    sigma_fit = max(sigma_fit, abs(Eq - E_central));
+end
+sigma_E = sqrt(sigma_fit.^2 + sigma_th^2);
+if any(abs(sigma_fit - sigma_lin) > 0.1*sigma_lin + 1e-6)
+    warning('Some energies are not linear in (A,B) over the 1-sigma ellipse: check sigma_lin vs sigma_fit.');
+end
 
 elapsed_time = toc;
 
@@ -150,9 +178,13 @@ if any(at_bound)
     warning('The minimum is at the boundary of [lb, ub] for %s: enlarge the bounds (errors are not reliable).', ...
         strjoin(pnames(at_bound), ' and '));
 end
-fprintf('\n  #   data     fit      pull\n');
+fprintf('\nErrors of E_fit: (A,B) covariance%s on the 1-sigma ellipse, total = sqrt(sigma_fit^2 + %.3f^2)\n', ...
+    repmat(' (scaled)', 1, scale > 1), sigma_th);
+fprintf('  #   data +/- err        E_fit +/- total    sigma_fit (lin)    pull  pull_tot\n');
 for k = 1:N
-    fprintf(' %2d  %.4f  %.4f  %+6.2f\n', k, t(k), E_central(k), (t(k)-E_central(k))/e(k));
+    fprintf(' %2d  %.4f +/- %.4f   %.4f +/- %.4f   %.4f (%.4f)  %+6.2f  %+6.2f\n', k, t(k), e(k), ...
+        E_central(k), sigma_E(k), sigma_fit(k), sigma_lin(k), (t(k)-E_central(k))/e(k), ...
+        (t(k)-E_central(k))/sqrt(e(k)^2 + sigma_E(k)^2));
 end
 
 % =========================================================
@@ -161,8 +193,10 @@ end
 figure('Color','w');
 errorbar(1:N, t, e, 'ko', 'MarkerFaceColor', 'k', 'DisplayName', 'Lattice');
 hold on;
-plot(1:N, E_central, 'r.', 'MarkerSize', 18, ...
-     'DisplayName', sprintf('Fit (\\chi^2/dof = %.2f)', chi2_red));
+errorbar((1:N) + 0.15, E_central, sigma_E, 'r.', 'MarkerSize', 18, 'CapSize', 3, ...
+     'DisplayName', sprintf('Fit (\\chi^2/dof = %.2f), \\sigma = (\\sigma_{fit}^2 + %.2f^2)^{1/2}', chi2_red, sigma_th));
+errorbar((1:N) + 0.15, E_central, sigma_fit, 'r', 'LineStyle', 'none', 'LineWidth', 2.5, 'CapSize', 0, ...
+     'DisplayName', '\sigma_{fit} (A, B)');
 xlabel('State index'); ylabel('Energy (GeV)');
 title(sprintf('Charmonium hybrid spectrum fit: A = %.4f, B = %.4f', A_central, B_central));
 legend('Location', 'best'); grid on;
