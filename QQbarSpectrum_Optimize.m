@@ -12,17 +12,40 @@
 %  - dE/dA = <psi|HA|psi>/m and dE/dB = <psi|HB|psi>/m (Hellmann-Feynman), so
 %    lsqnonlin gets the exact Jacobian.
 %  - The index in the assignment table is the position in energy order at
-%    the best fit. The grid scan uses plain energy order. For the local fit
-%    each level is followed as "k-th state of its decoupled channel block"
-%    (so levels of different blocks can cross without being swapped, which
-%    keeps chi^2 smooth). At the minimum the energy order is checked again
-%    and, if it changed, the fit is repeated from there until it is stable.
+%    the best fit ref = [A, B] of hybridAssignments.m. At ref each level is
+%    identified as "k-th state of its decoupled channel block", and this
+%    label is followed in the grid scan and in the fit. Levels of the same
+%    block do not cross, while levels of different blocks can cross without
+%    being swapped (with mixing the quarkonium levels lie between the hybrid
+%    ones, and plain energy order would jump to other states). At the
+%    minimum the energy order is checked again: if it changed, the new
+%    indices are printed, to be copied into hybridAssignments.m with the
+%    new ref.
 %  - Errors from the Jacobian at the minimum: cov = inv(J'*J) (Delta chi^2=1),
 %    also given scaled by sqrt(chi^2/dof) when chi^2/dof > 1 (PDG convention).
 %    The chi^2 map is plotted with the 68% / 95% contours for 2 parameters.
 %  - Errors of the fitted energies: the (A,B) covariance (with correlation)
 %    is propagated to each E, checked on the 1-sigma ellipse, and added in
 %    quadrature to sigma_th = 0.03 GeV (higher orders).
+%
+% IF THE POTENTIALS (or Eval, sigma, glambda, r0, the data...) CHANGE
+%  The (A,B) of the best fit and the energy order of the states change, so
+%  the assignment tables must be checked again. For mix=false AND mix=true
+%  (the cfg line below):
+%   1. Check the assignment at the current ref: run QQbarSpectrum.m (with
+%      the same mix) and look at the wave-function plots. Each panel says
+%      which data point is assigned to that state; check with the channels
+%      in the legend that it is the intended state. If not, correct the
+%      indices in hybridAssignments.m (they must be right AT ref).
+%   2. Run this script. If it prints "The energy order at the minimum
+%      differs from the table", copy the printed indices AND the new ref
+%      (best A, B) into hybridAssignments.m. Otherwise copy only the new ref.
+%   3. Copy the same indices into compute_spectrum_nomix / compute_spectrum_mix
+%      of QQbarSpectrum.m (they are hard-coded there, a(k) = row k).
+%   4. Run QQbarSpectrum.m again: its chi2 must be the one of this script,
+%      and the plots at the new ref must show the intended states.
+%  QQbarSpectrum.m, QQbarSpectrumTable.m and spinAverages.m read A and B
+%  from ref, so nothing else has to be changed by hand.
 
 % =========================================================
 % Settings
@@ -39,7 +62,7 @@ cfg = hybridConfig('Eg', true, 'mix', true, 'hf', true);
 m_q = 1.496;
 
 % Lattice data and assignment of each data point (see hybridAssignments.m)
-[assign, t, e] = hybridAssignments(cfg.mix);
+[assign, t, e, ~, ref] = hybridAssignments(cfg.mix);
 
 % Parameter bounds [A, B]
 lb = [-0.3, -0.06];
@@ -58,9 +81,10 @@ N_grid = 25;
 % =========================================================
 fprintf('Building Hamiltonians (mix=%d, hf=%d, Eg=%d)...\n', cfg.mix, cfg.hf, cfg.Eg);
 model = build_model(m_q, assign, solverOpts);
+model = identify_states(model, ref(1), ref(2));
 
 % =========================================================
-% 2. Coarse grid (starting point + chi^2 map), energy order
+% 2. Coarse grid (starting point + chi^2 map), states identified at ref
 % =========================================================
 A_vec = linspace(lb(1), ub(1), N_grid);
 B_vec = linspace(lb(2), ub(2), N_grid);
@@ -69,7 +93,7 @@ fprintf('Grid scan (%d x %d)...\n', N_grid, N_grid);
 tgrid = tic;
 for i = 1:N_grid
     for j = 1:N_grid
-        E = model_spectrum(identify_states(model, A_vec(i), B_vec(j)), A_vec(i), B_vec(j));
+        E = model_spectrum(model, A_vec(i), B_vec(j));
         chi2_map(j,i) = sum(((t - E)./e).^2);
     end
 end
@@ -80,8 +104,8 @@ p0 = [A_vec(imin), B_vec(jmin)];
 fprintf('Best grid point: A = %.4f, B = %.4f (chi^2 = %.3f)\n\n', p0(1), p0(2), chi2_grid);
 
 % =========================================================
-% 3. Local minimization (lsqnonlin, exact Jacobian), repeated until the
-%    energy order at the minimum matches the one used in the fit
+% 3. Local minimization (lsqnonlin, exact Jacobian), then check that the
+%    energy order at the minimum is still the one of the table
 % =========================================================
 options = optimoptions('lsqnonlin', ...
     'Display', 'final', ...
@@ -89,24 +113,10 @@ options = optimoptions('lsqnonlin', ...
     'FunctionTolerance', 1e-12, ...
     'StepTolerance', 1e-10, ...
     'OptimalityTolerance', 1e-10);
-max_refits = 5;
-consistent = false;
-for it = 1:max_refits
-    model = identify_states(model, p0(1), p0(2));
-    obj_fun = @(p) residuals(p, model, t, e);
-    [best_params, chi2_min, ~, exitflag] = lsqnonlin(obj_fun, p0, lb, ub, options);
-    model_best = identify_states(model, best_params(1), best_params(2));
-    if isequal(model_best.block, model.block) && isequal(model_best.ord, model.ord)
-        consistent = true;
-        break;
-    end
-    fprintf('Energy order at the minimum differs from the start point: refitting (%d)\n', it);
-    p0 = best_params;
-end
-if ~consistent
-    warning(['The energy order at the minimum keeps changing: some assigned levels ' ...
-             'are (nearly) degenerate with another level. Check the assignment table.']);
-end
+obj_fun = @(p) residuals(p, model, t, e);
+[best_params, chi2_min, ~, exitflag] = lsqnonlin(obj_fun, p0, lb, ub, options);
+idx_min = energy_index(model, best_params(1), best_params(2));
+consistent = isequal(idx_min, model.idx);
 A_central = best_params(1);
 B_central = best_params(2);
 
@@ -129,7 +139,7 @@ at_bound = abs(best_params - lb) < 1e-6*(ub-lb) | abs(best_params - ub) < 1e-6*(
 % Mesh convergence check at the minimum
 [E_central, dEdA, dEdB] = model_spectrum(model, A_central, B_central);
 opts2 = solverOpts; opts2.N = round(1.4*solverOpts.N); opts2.rmax = 1.2*solverOpts.rmax;
-model2 = identify_states(build_model(m_q, assign, opts2), A_central, B_central);
+model2 = identify_states(build_model(m_q, assign, opts2), ref(1), ref(2));
 dE_mesh = max(abs(model_spectrum(model2, A_central, B_central) - E_central));
 
 % =========================================================
@@ -170,10 +180,23 @@ fprintf('Total Chi^2:        %.4f\n', chi2_min);
 fprintf('Degrees of Freedom: %d\n', dof);
 fprintf('Chi^2 / dof:        %.4f\n', chi2_red);
 fprintf('p-value:            %.4f\n', 1 - chi2cdf(chi2_min, dof));
-fprintf('lsqnonlin exitflag: %d, energy order consistent: %d (fits: %d)\n', exitflag, consistent, it);
+fprintf('lsqnonlin exitflag: %d, energy order at the minimum = table: %d\n', exitflag, consistent);
 fprintf('Mesh check: max |dE| (N=%d vs N=%d) = %.1e GeV\n', solverOpts.N, opts2.N, dE_mesh);
 fprintf('Total Runtime:      %.2f seconds\n', elapsed_time);
 fprintf('======================================================\n');
+if ~consistent
+    k = find(idx_min ~= model.idx);
+    if cfg.mix, mix_name = 'mix'; else, mix_name = 'nomix'; end
+    fprintf(['\nThe energy order at the minimum differs from the table for data point(s) %s\n' ...
+             '(same states, followed by channel block). Indices at the minimum:\n    %s\n' ...
+             'Copy them into hybridAssignments.m with ref = [%.6f, %.6f],\n' ...
+             'and the same indices into compute_spectrum_%s of QQbarSpectrum.m\n' ...
+             '(see "IF THE POTENTIALS CHANGE" at the top of this script).\n'], ...
+        mat2str(k), mat2str(idx_min), A_central, B_central, mix_name);
+else
+    fprintf(['\nEnergy order at the minimum = table. If A, B changed, copy\n' ...
+             'ref = [%.6f, %.6f] into hybridAssignments.m.\n'], A_central, B_central);
+end
 if any(at_bound)
     pnames = {'A','B'};
     warning('The minimum is at the boundary of [lb, ub] for %s: enlarge the bounds (errors are not reliable).', ...
@@ -301,6 +324,27 @@ function model = identify_states(model, A, B)
         for k = ks
             model.block(k) = ball(s(model.idx(k)));
             model.ord(k) = oall(s(model.idx(k)));
+        end
+    end
+end
+
+
+function idx = energy_index(model, A, B)
+% Position in energy order (as in the assignment table) of each followed
+% state at (A,B)
+    idx = model.idx;
+    for Jc = 0:3
+        ks = find(model.spin == 1 & model.Jc == Jc);
+        if isempty(ks), continue; end
+        F = model.fam{Jc+1};
+        Eall = []; ball = []; oall = [];
+        for b = 1:numel(F.blocks)
+            Eb = sort(eig(F.H0{b} + A*F.HA{b} + B*F.HB{b}))';
+            Eall = [Eall, Eb]; ball = [ball, b*ones(size(Eb))]; oall = [oall, 1:numel(Eb)]; %#ok<AGROW>
+        end
+        [~, s] = sort(Eall);
+        for k = ks
+            idx(k) = find(ball(s) == model.block(k) & oall(s) == model.ord(k));
         end
     end
 end
