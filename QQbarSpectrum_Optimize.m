@@ -32,7 +32,8 @@ tic;
 
 % Flags for all hybrid files (see hybridConfig.m)
 hybridConfig('reset');
-cfg = hybridConfig('Eg', true, 'mix', false, 'hf', true);
+%cfg = hybridConfig('Eg', true, 'mix', false, 'hf', true);
+cfg = hybridConfig('Eg', true, 'mix', true, 'hf', true);
 
 % Quark mass
 m_q = 1.496;
