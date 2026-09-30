@@ -34,7 +34,7 @@ function d = defaults()
 d.Eg   = true;
 d.Eval = 0.45;
 % Mixing of hybrids with quarkonium
-d.mix  = false;
+d.mix  = true;
 % Hyperfine splitting (spin-1 hybrids)
 d.hf     = true;
 d.glamb1 = -0.1;   % glambda'   in GeV
