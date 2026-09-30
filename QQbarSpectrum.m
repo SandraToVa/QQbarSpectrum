@@ -12,25 +12,20 @@ hybridConfig('reset');
 quarkoniumConfig('reset');
 
 cfg_q = quarkoniumConfig('Eg', true, 'mix', true);
-cfg_h = hybridConfig('Eg', true, 'mix', false, 'hf', true);
+cfg_h = hybridConfig('Eg', true, 'mix', true, 'hf', true);
 
 % Data
 m_q = 1.496;
-A_nomix = -0.044691;
-B_nomix = 0.001377;
-A_mix = -0.080695;
-B_mix = -0.001471;
+% A and B: best fit of QQbarSpectrum_Optimize, stored as ref in
+% hybridAssignments.m (one for mix=false, one for mix=true)
+[assign, ~, ~, states, ref] = hybridAssignments(cfg_h.mix);
+A = ref(1);
+B = ref(2);
 
 if cfg_h.mix
-    A = A_mix;
-    B = B_mix;
-
     disp('The following results are computing WITH mixing');
     disp('------------------------------------------------------');
 else
-    A = A_nomix;
-    B=B_nomix;
-
     disp('The following results are computing WITHOUT mixing')
     disp('------------------------------------------------------');
 end
@@ -130,13 +125,27 @@ for n = 1:length(j_list)
         xlim([0, 6]);
         xlabel('r [GeV^{-1}]');
         ylabel('u_c(r)');
-        title(sprintf('State %d (E = %.4f GeV)', i, e_all{n}(i)));
+        ttl = sprintf('State %d (E = %.4f GeV)', i, e_all{n}(i));
+        % lattice point assigned to this state (hybridAssignments.m)
+        if GQQ
+            k = find(cell2mat(assign(:,1)) == spin & cell2mat(assign(:,2)) == j_list(n) ...
+                     & cell2mat(assign(:,3)) == i);
+            for kk = k'
+                ttl = sprintf('%s\n#%d %s %s', ttl, kk, ...
+                    states.multipletNames{states.multiplet(kk)}, states.JPC{kk});
+            end
+        end
+        title(ttl, 'FontSize', 8);
   
     end
-    % Dynamic Legend for channel components
+    % Legend with the channels, in the order of the potential matrix
     num_comp = size(u_curr, 1);
     comp_labels = arrayfun(@(c) sprintf('Comp %d', c), 1:num_comp, 'UniformOutput', false);
-    legend(comp_labels, 'Location', 'best', 'FontSize', 7);
+    if spin && GQQ
+        lab = spin1HybridChannels(j_list(n), cfg_h.mix);
+        if numel(lab) == num_comp, comp_labels = lab; end
+    end
+    legend(comp_labels, 'Location', 'eastoutside', 'FontSize', 8);
 end
 
 %%
@@ -178,8 +187,25 @@ chi2_red = chi2 / dof;
 % Functions
 % ---------------------------------------------------------
 
+function lab = spin1HybridChannels(Jcal, mix)
+% Channels of GQQbarS1Jcal<Jcal>.m, in the order of its potential matrix
+% (P_1^{ab}: L = J + a, j = J + b), with R_0 first if mix
+    if Jcal == 0
+        lab = {'P_1^{++}','P_1^{-+}','P_1^{0+}'};
+    elseif Jcal == 1
+        lab = {'P_1^{++}','P_1^{-+}','P_1^{+-}','P_1^{00}','P_1^{0+}','P_1^{+0}','P_1^{-0}'};
+    else
+        lab = {'P_1^{++}','P_1^{-+}','P_1^{+-}','P_1^{--}','P_1^{00}', ...
+               'P_1^{0+}','P_1^{0-}','P_1^{+0}','P_1^{-0}'};
+    end
+    if mix, lab = [{'R_0'}, lab]; end
+end
+
 function E_list = compute_spectrum_nomix(m_q, A, B)
 % Function to compute the spectrum without mixing
+%  !! Same indices as hybridAssignments.m (row k = a(k)). If the potentials
+%  !! change, update them here too: see "IF THE POTENTIALS CHANGE" at the
+%  !! top of QQbarSpectrum_Optimize.m.
 
     % Hybrids spin 0 spectrum (ordered by Jcal=J \neq L)
     [h0,~,~] = GQQbarS0Jcal0(m_q);
@@ -218,6 +244,11 @@ end
 
 function E_list = compute_spectrum_mix(m_q, A, B)
 % Function to compute the spectrum with mixing
+% Indices = energy order at the mix best fit (see hybridAssignments.m):
+% with mixing some of them change with A and B
+%  !! Same indices as hybridAssignments.m (row k = a(k)). If the potentials
+%  !! change, update them here too: see "IF THE POTENTIALS CHANGE" at the
+%  !! top of QQbarSpectrum_Optimize.m.
 
     % Hybrids spin 0 spectrum (ordered by Jcal=J \neq L)
     [h0,~,~] = GQQbarS0Jcal0(m_q);
@@ -239,11 +270,11 @@ function E_list = compute_spectrum_mix(m_q, A, B)
     a(1)  = h1(6); 
     a(2)  = jh0(3); 
     a(3)  = jh1(3); 
-    a(4)  = jh2(3); 
+    a(4)  = jh2(2); 
     a(5)  = h1(9);
-    a(6)  = jh0(4);
+    a(6)  = jh0(5);
     a(7)  = jh1(4);
-    a(8)  = jh2(2);
+    a(8)  = jh2(3);
     a(9)  = h2(6);
     a(10) = jh1(5);
     a(11) = jh2(5);
