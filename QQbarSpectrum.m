@@ -1,9 +1,39 @@
 % Quarkonium spectrum with new potentials
 % Different energies for states S, P, and D
 
-%massa
-%mass = load("dades.mat","m_c","m_b");
+% =========================================================
+% Settings
+% =========================================================
+clear; clc;
+tic;
+
+% Flags for all hybrid files and quarkonium
+hybridConfig('reset');
+quarkoniumConfig('reset');
+
+cfg_q = hybridConfig('Eg', true, 'mix', true);
+cfg_h = hybridConfig('Eg', true, 'mix', true, 'hf', true);
+
+% Data
 m_q = 1.496;
+A_nomix = -0.044691;
+B_nomix = 0.001377;
+A_mix = -0.080695;
+B_mix = -0.001471;
+
+if cfg_h.mix
+    A = A_mix;
+    B = B_mix;
+
+    disp('The following results are computing WITH mixing');
+    disp('------------------------------------------------------');
+else
+    A = A_nomix;
+    B=B_nomix;
+
+    disp('The following results are computing WITHOUT mixing')
+    disp('------------------------------------------------------');
+end
 
 % arrays for the spectrum all can contain mixing
 
@@ -34,8 +64,6 @@ m_q = 1.496;
 % Without mixing this gives the different as spin 0 states because we have
 % hyperfine splitting of hybrids at this order.
 % We can see which state is it by the shape of the wave function
-A=-0.070;
-B=0.0117;
 
 [jh0,wjh0,jhx0] = GQQbarS1Jcal0(m_q,A,B);
 [jh1,wjh1,jhx1] = GQQbarS1Jcal1(m_q,A,B);
@@ -47,10 +75,10 @@ B=0.0117;
 % ---------------------------------------------------------
 
 spin=true;
-G=true;
+GQQ=true;
 
 if spin
-    if G
+    if GQQ
         wf_all = {wjh0, wjh1, wjh2, wjh3};
         x_all  = {jhx0, jhx1, jhx2, jhx3};
         e_all  = {jh0, jh1, jh2, jh3};
@@ -62,7 +90,7 @@ if spin
         j_list = [0, 1, 2];
     end
 else
-    if G
+    if GQQ
         wf_all = {wh0, wh1, wh2};
         x_all  = {hx0, hx1, hx2};
         e_all  = {h0, h1, h2};
@@ -115,12 +143,8 @@ end
 % ---------------------------------------------------------
 % Final hyperfine spectrum
 % ---------------------------------------------------------
-% Data
-m_q = 1.496;
-A_nomix=-0.0447;
-B_nomix=0.0014;
-A_mix=0;
-B_mix=0;
+
+
 % Order [{4 (s/d)1 states}, {4 p_1 states}, {4 (p/f)2 states}, {2 p_0 states}]
 t = [4.0296 3.8976 3.9286 4.0746 4.1436 4.1106 4.1116 4.1756 ...
      4.2306 4.1786 4.2386 4.2516 4.4396 4.5136];
@@ -129,16 +153,17 @@ e = [0.0176 0.0186 0.0236 0.0216 0.0256 0.0276 0.0236 0.0186 ...
      0.0326 0.0276 0.0266 0.0346 0.0466 0.0536];
 
 % 1. Compute spectrum
-E_calc_nomix = compute_spectrum_nomix(m_q, A, B); 
-E_calc_mix = compute_spectrum_mix(m_q, A, B);
+if cfg_h.mix
+    E_calc = compute_spectrum_mix(m_q, A, B); 
+else
+    E_calc = compute_spectrum_nomix(m_q, A, B);
+end
 
 % 2. Calculate chi-squared components
-residuals_nomix = t - E_calc_nomix;             % Differences between exp (t) and calc
-weighted_residuals_nomix = residuals_nomix ./ e; % Scaled by uncertainties (e)
-chi2_nomix = sum(weighted_residuals_nomix.^2);   % Total chi^2
-residuals_mix = t - E_calc_mix;             
-weighted_residuals_mix = residuals_mix ./ e; 
-chi2_mix = sum(weighted_residuals_mix.^2);   
+residuals = t - E_calc;             % Differences between exp (t) and calc
+weighted_residuals = residuals ./ e; % Scaled by uncertainties (e)
+chi2 = sum(weighted_residuals.^2);   % Total chi^2
+
 
 % 3. Calculate degrees of freedom
 N = length(t);   % Number of data points (e.g., 14)
@@ -146,8 +171,7 @@ p = 2;           % Number of fitted parameters (A and B)
 dof = N - p;
 
 % 4. Compute reduced chi-squared
-chi2_red_nomix = chi2_nomix / dof;
-chi2_red_mix = chi2_mix / dof;
+chi2_red = chi2 / dof;
 
 
 % ---------------------------------------------------------
