@@ -13,26 +13,19 @@
 % Autor: Sandra Tomàs
 
 m_q = 1.496;
-A_nomix = -0.044691;
-B_nomix = 0.001377;
-A_mix = -0.080695;
-B_mix = -0.001471;
 
 Emax = 1.80;   % highest E (GeV) listed
 nmax = 20;     % states computed per file
 
 hybridConfig('reset');
 quarkoniumConfig('reset');
-hybridConfig('mix', true, 'hf', true);
+cfg_h = hybridConfig('mix', true, 'hf', true);
 quarkoniumConfig('mix', true);
 
-if cfg.mix
-    A = A_mix;
-    B = B_mix;
-else
-    A = A_nomix;
-    B=B_nomix;
-end
+% A and B: best fit stored as ref in hybridAssignments.m
+[~, ~, ~, ~, ref] = hybridAssignments(cfg_h.mix);
+A = ref(1);
+B = ref(2);
 
 % Quarkonium files (as in Fig. 5)
 quarkoniumFiles = {'QQbarS0J0','QQbarS0J1','QQbarS0J2', ...

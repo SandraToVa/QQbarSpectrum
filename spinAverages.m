@@ -19,11 +19,22 @@ clear; clc;
 % Settings
 % =========================================================
 hybridConfig('reset');
-cfg = hybridConfig('Eg', true, 'mix', false, 'hf', true);
+cfg_h = hybridConfig('Eg', true, 'mix', false, 'hf', true);
 
+% Data
 m_q = 1.496;
-A = -0.044691;     % e.g. the best fit of QQbarSpectrum_Optimize
-B =  0.001377;
+% A and B: best fit stored as ref in hybridAssignments.m
+[assign, t, e, states, ref] = hybridAssignments(cfg_h.mix);
+A = ref(1);
+B = ref(2);
+
+if cfg_h.mix
+    disp('The following results are computing WITH mixing');
+    disp('------------------------------------------------------');
+else
+    disp('The following results are computing WITHOUT mixing')
+    disp('------------------------------------------------------');
+end
 
 nParams = 2;       % fitted parameters, for chi^2/dof
 solverOpts.N = 60;
@@ -32,7 +43,6 @@ solverOpts.rmax = 25;
 % =========================================================
 % Model spectrum of the assigned states
 % =========================================================
-[assign, t, e, states] = hybridAssignments(cfg.mix);
 E = assigned_spectrum(assign, m_q, A, B, solverOpts);
 
 nData = numel(t);
@@ -44,7 +54,7 @@ names = states.multipletNames;
 nMult = numel(names);
 
 fprintf('Spin averages at A = %.6f, B = %.6f  (mix=%d, hf=%d, Eg=%d)\n\n', ...
-    A, B, cfg.mix, cfg.hf, cfg.Eg);
+    A, B, cfg_h.mix, cfg_h.hf, cfg_h.Eg);
 
 % ---------------------------------------------------------
 % Table 1: every data point
@@ -120,7 +130,7 @@ fprintf('Left if each multiplet shifts freely %6.2f   chi^2/dof = %.2f  (dof %d)
     chi2_shift, chi2_shift/(dof-nMult), dof-nMult);
 fprintf('Best common shift %+6.1f MeV         %6.2f   chi^2/dof = %.2f  (dof %d)\n', ...
     1000*s_common, chi2_common, chi2_common/(dof-1), dof-1);
-fprintf('   (equivalent to Eval = %.4f GeV instead of %.4f)\n', cfg.Eval - s_common, cfg.Eval);
+fprintf('   (equivalent to Eval = %.4f GeV instead of %.4f)\n', cfg_h.Eval - s_common, cfg_h.Eval);
 fprintf('Shifts are evaluated at fixed A, B (no refit).\n');
 fprintf('=========================================================\n');
 

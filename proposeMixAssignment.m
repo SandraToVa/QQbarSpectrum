@@ -14,8 +14,9 @@ clear; clc;
 
 % Point where the states are compared (e.g. the mix=false best fit)
 m_q = 1.496;
-A = -0.0548;
-B =  0.0038;
+[~, ~, ~, ~, refF] = hybridAssignments(false);   % mix=false best fit
+A = refF(1);
+B = refF(2);
 
 nstates = 25;                 % states computed per file with mixing
 opts.N = 60; opts.rmax = 25;  % same mesh for both cases
