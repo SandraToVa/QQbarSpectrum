@@ -80,13 +80,24 @@ for n = 1:length(j_list)
     figure('Color', 'w', 'Name', sprintf('J_cal = %d', j_list(n)));
     x_curr = x_all{n};
     
-    for i = 1:7
+    for i = 1:9
         subplot(3, 3, i); % 3x3 layout fits up to 9 subplots
         
         % Extract all channel components for state i
-        u_curr = squeeze(wf_all{n}(:, :, i)); 
-        
-        plot(x_curr, u_curr', 'LineWidth', 1.2);
+        u_curr = squeeze(wf_all{n}(:, :, i));
+
+        % Cycle through 7 colors, switching line style every 7 components
+        % so every (color, style) pair is unique
+        colors  = lines(7);
+        lstyles = {'-', '--', ':', '-.'};
+        hold on;
+        for c = 1:size(u_curr, 1)
+            plot(x_curr, u_curr(c, :), ...
+                'Color', colors(mod(c-1, 7) + 1, :), ...
+                'LineStyle', lstyles{mod(floor((c-1)/7), numel(lstyles)) + 1}, ...
+                'LineWidth', 1.2);
+        end
+        hold off;
         grid on;
         xlim([0, 6]);
         xlabel('r [GeV^{-1}]');
@@ -106,8 +117,10 @@ end
 % ---------------------------------------------------------
 % Data
 m_q = 1.496;
-A=-0.070;
-B=0.0117;
+A_nomix=-0.0447;
+B_nomix=0.0014;
+A_mix=0;
+B_mix=0;
 % Order [{4 (s/d)1 states}, {4 p_1 states}, {4 (p/f)2 states}, {2 p_0 states}]
 t = [4.0296 3.8976 3.9286 4.0746 4.1436 4.1106 4.1116 4.1756 ...
      4.2306 4.1786 4.2386 4.2516 4.4396 4.5136];
@@ -116,12 +129,16 @@ e = [0.0176 0.0186 0.0236 0.0216 0.0256 0.0276 0.0236 0.0186 ...
      0.0326 0.0276 0.0266 0.0346 0.0466 0.0536];
 
 % 1. Compute spectrum
-E_calc = compute_spectrum(m_q, A, B); % Replace with your calculation function
+E_calc_nomix = compute_spectrum_nomix(m_q, A, B); 
+E_calc_mix = compute_spectrum_mix(m_q, A, B);
 
 % 2. Calculate chi-squared components
-residuals = t - E_calc;             % Differences between exp (t) and calc
-weighted_residuals = residuals ./ e; % Scaled by uncertainties (e)
-chi2 = sum(weighted_residuals.^2);   % Total chi^2
+residuals_nomix = t - E_calc_nomix;             % Differences between exp (t) and calc
+weighted_residuals_nomix = residuals_nomix ./ e; % Scaled by uncertainties (e)
+chi2_nomix = sum(weighted_residuals_nomix.^2);   % Total chi^2
+residuals_mix = t - E_calc_mix;             
+weighted_residuals_mix = residuals_mix ./ e; 
+chi2_mix = sum(weighted_residuals_mix.^2);   
 
 % 3. Calculate degrees of freedom
 N = length(t);   % Number of data points (e.g., 14)
@@ -129,15 +146,16 @@ p = 2;           % Number of fitted parameters (A and B)
 dof = N - p;
 
 % 4. Compute reduced chi-squared
-chi2_red = chi2 / dof;
+chi2_red_nomix = chi2_nomix / dof;
+chi2_red_mix = chi2_mix / dof;
 
 
 % ---------------------------------------------------------
 % Functions
 % ---------------------------------------------------------
 
-function E_list = compute_spectrum(m_q, A, B)
-% Function to compute the spectrum
+function E_list = compute_spectrum_nomix(m_q, A, B)
+% Function to compute the spectrum without mixing
 
     % Hybrids spin 0 spectrum (ordered by Jcal=J \neq L)
     [h0,~,~] = GQQbarS0Jcal0(m_q);
@@ -155,8 +173,7 @@ function E_list = compute_spectrum(m_q, A, B)
     a = zeros(1, 14);
     
     % MAP YOUR ENERGIES HERE
-    % Example: Assigning specific values of jhn to the vector 'a'
-    % You must update these indices to match your actual physics mapping
+    % Assigning specific values of jhn to the vector 'a'
     a(1)  = h1(1); 
     a(2)  = jh0(1); 
     a(3)  = jh1(1); 
@@ -171,6 +188,44 @@ function E_list = compute_spectrum(m_q, A, B)
     a(12) = jh3(1);
     a(13) = h0(1);
     a(14) = jh1(6);
+    
+    E_list = a;
+end
+
+function E_list = compute_spectrum_mix(m_q, A, B)
+% Function to compute the spectrum with mixing
+
+    % Hybrids spin 0 spectrum (ordered by Jcal=J \neq L)
+    [h0,~,~] = GQQbarS0Jcal0(m_q);
+    [h1,~,~] = GQQbarS0Jcal1(m_q);
+    [h2,~,~] = GQQbarS0Jcal2(m_q);
+    
+    % Hybrids spin 1 spectrum
+    % Compute the spectra with the current test values for A and B
+    [jh0,~,~] = GQQbarS1Jcal0(m_q, A, B);
+    [jh1,~,~] = GQQbarS1Jcal1(m_q, A, B);
+    [jh2,~,~] = GQQbarS1Jcal2(m_q, A, B);
+    [jh3,~,~] = GQQbarS1Jcal3(m_q, A, B);
+    
+    % Initialize the calculated energy vector
+    a = zeros(1, 14);
+    
+    % MAP YOUR ENERGIES HERE
+    % Assigning specific values of jhn to the vector 'a'
+    a(1)  = h1(6); 
+    a(2)  = jh0(3); 
+    a(3)  = jh1(3); 
+    a(4)  = jh2(3); 
+    a(5)  = h1(9);
+    a(6)  = jh0(4);
+    a(7)  = jh1(4);
+    a(8)  = jh2(2);
+    a(9)  = h2(6);
+    a(10) = jh1(5);
+    a(11) = jh2(6);
+    a(12) = jh3(2);
+    a(13) = h0(4);
+    a(14) = jh1(9);
     
     E_list = a;
 end
