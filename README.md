@@ -37,7 +37,7 @@ A single family can also be called directly:
 | `GQQbarS1Jcal{0,1,2,3}.m` | Spin-1 hybrids with hyperfine terms (depend on A, B) |
 | `quarkoniumConfig.m` | Flags for the quarkonium files: `Eg`, `Eval`, `mix` |
 | `hybridConfig.m` | Flags for the hybrid files: `Eg`, `Eval`, `mix`, `hf`, `glamb1`, `glamb3`, `sig`, `pm`, `r0` |
-| `hybridAssignments.m` | Lattice data `t`, `e` and which computed state each data point is compared with (one table for mix=false, one for mix=true) |
+| `hybridAssignments.m` | Lattice data `t`, `e` and which computed state each data point is compared with (one table for mix=false, one for mix=true, each with the (A, B) `ref` where its indices are valid) |
 | `QQbarSpectrum.m` | Computes everything and plots the wave functions |
 | `QQbarSpectrumTable.m` | Spectrum tables as in mixing.pdf: n, S, J, j, L, E, J^PC, dominant component, %Q, %H of every state |
 | `QQbarSpectrum_Optimize.m` | Fit of A and B |
@@ -132,20 +132,29 @@ A warning is printed if the minimum lies on the boundary of `[lb, ub]`.
 
 Each row of the table in `hybridAssignments.m` is `{spin, Jcal, index}`:
 the data point `t(k)` is compared with the `index`-th state, in energy
-order, of `GQQbarS<spin>Jcal<Jcal>.m`, **at the best fit**.
+order, of `GQQbarS<spin>Jcal<Jcal>.m`, **at the best fit** `ref = [A, B]`
+(stored next to each table).
 
 When levels of different decoupled channel blocks cross as A and B change,
 pure energy order would swap states during the fit and put kinks in chi^2.
-So the fit follows each level as "k-th state of its channel block". At the
-minimum it checks the energy order again, and if it changed, it refits from
-there until it is stable. The printed assignment table shows, for every data
-point, the block (channels) and the energy at the best fit, so you can check
-that each point is matched to the intended state.
+So the fit identifies each level once, at `ref`, as "k-th state of its
+channel block", and follows that label in the grid scan and in the fit
+(levels of the same block do not cross). At the minimum it checks the energy
+order again; if it changed, it prints the new indices, to be copied into
+`hybridAssignments.m` together with the new `ref`. The printed assignment
+table shows, for every data point, the block (channels) and the energy at
+the best fit, so you can check that each point is matched to the intended
+state.
 
 With `mix = true` quarkonium states enter the spectra, so the indices
 change. That case uses its own table. `proposeMixAssignment.m` can suggest
 one from wave-function overlaps with the mix=false states, but the final
-table should be checked against the wave functions.
+table should be checked against the wave functions (channel weights). With
+mixing several indices depend on A and B: at the mix best fit the p1 0+-
+(P1^{0+}) is above the R0 3S quarkonium level, and the (s/d)1 2-+ and p1 2+-
+levels are only 9 MeV apart. Following states only by energy order, the fit
+ended at spurious minima (chi^2 ~ 42-43) with the p1 0+- point compared with
+the eta_c(3S).
 
 ## Known limitations
 
@@ -158,12 +167,16 @@ table should be checked against the wave functions.
 
 ## Status (Eg = true, hf = true)
 
-- mix = false: A = −0.0447 ± 0.0140, B = 0.0014 ± 0.0078 (errors scaled by
-  √(χ²/dof)), ρ = 0.57, χ²/dof = 33.0/12 = 2.75. The four spin-0 points, which
+- mix = false: A = −0.0484 ± 0.0115, B = −0.0094 ± 0.0064 (errors scaled by
+  √(χ²/dof)), ρ = 0.46, χ²/dof = 27.2/12 = 2.27. The four spin-0 points, which
   do not depend on A or B, contribute 7.5 to the χ².
-- mix = true: A = −0.0920 ± 0.0150, B = −0.0397 ± 0.0071, ρ = 0.01,
-  χ²/dof = 43.8/12 = 3.65. The mix = true assignment table should be checked at
-  this minimum.
+- mix = true: A = −0.0855 ± 0.0163, B = −0.0164 ± 0.0080, ρ = 0.40,
+  χ²/dof = 47.7/12 = 3.97. The spin-0 points contribute 18.3.
+
+Both with the corrected (p/f)2 2+- assignment (second level of the decoupled
+block of GQQbarS1Jcal2). Most of the χ² comes from the spin averages of the
+(s/d)1 and (p/f)2 multiplets, 40–50 MeV above the lattice (see
+`spinAverages.m`).
 
 The fitted energies get the error σ_E = √(σ_fit² + 0.03²) GeV, where σ_fit is
 the (A, B) covariance propagated to each energy (checked on the 1σ ellipse).
