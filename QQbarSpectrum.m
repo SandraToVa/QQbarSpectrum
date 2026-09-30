@@ -11,8 +11,8 @@ tic;
 hybridConfig('reset');
 quarkoniumConfig('reset');
 
-cfg_q = hybridConfig('Eg', true, 'mix', true);
-cfg_h = hybridConfig('Eg', true, 'mix', true, 'hf', true);
+cfg_q = quarkoniumConfig('Eg', true, 'mix', true);
+cfg_h = hybridConfig('Eg', true, 'mix', false, 'hf', true);
 
 % Data
 m_q = 1.496;
@@ -208,7 +208,7 @@ function E_list = compute_spectrum_nomix(m_q, A, B)
     a(8)  = jh2(2);
     a(9)  = h2(1);
     a(10) = jh1(3);
-    a(11) = jh2(4);
+    a(11) = jh2(3);
     a(12) = jh3(1);
     a(13) = h0(1);
     a(14) = jh1(6);
@@ -246,7 +246,7 @@ function E_list = compute_spectrum_mix(m_q, A, B)
     a(8)  = jh2(2);
     a(9)  = h2(6);
     a(10) = jh1(5);
-    a(11) = jh2(6);
+    a(11) = jh2(5);
     a(12) = jh3(2);
     a(13) = h0(4);
     a(14) = jh1(9);
