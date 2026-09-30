@@ -22,7 +22,7 @@ function [E,W,x,info]=GQQbarS1Jcal0(m,A,B,opts)
 Vfun=@(x) potentialMatrix(x,m,A,B);
 
 % number of states we compute
-nstates=7;
+nstates=9;
 
 if ~exist('opts','var'), opts = struct(); end
 if ischar(opts) && strcmp(opts,'potential')

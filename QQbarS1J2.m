@@ -20,7 +20,7 @@ function [E,W,x,info]=QQbarS1J2(m,opts)
 Vfun=@(x) potentialMatrix(x,m);
 
 % number of states we compute
-nstates=7;
+nstates=9;
 
 if ~exist('opts','var'), opts = struct(); end
 if ischar(opts) && strcmp(opts,'potential')
